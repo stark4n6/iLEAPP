@@ -90,6 +90,7 @@ from scripts.artifacts.photosMetadata import get_photosMetadata
 from scripts.artifacts.powerlogAll import get_powerlogAll
 from scripts.artifacts.powerlogGZ import get_powerlogGZ
 from scripts.artifacts.queryPredictions import get_queryPredictions
+from scripts.artifacts.recentApphistory import get_recentApphistory
 from scripts.artifacts.routineDCloud import get_routineDCloud
 from scripts.artifacts.routineDLocationsLocal import get_routineDLocationsLocal
 from scripts.artifacts.routineDlocations import get_routineDlocations
@@ -226,6 +227,7 @@ tosearch = {'lastBuild': ('IOS Build', '*LastBuildInfo.plist'),
             'powerlogGZ': ('Powerlog Backups', '**/Library/BatteryLife/Archives/powerlog_*.PLSQL.gz'),
             'queryPredictions': ('SMS & iMessage', '**/query_predictions.db'),
             'quickLook': ('iCloud Quick Look', '*/Quick Look/cloudthumbnails.db*'),
+            'recentApphistory':('CarPlay', '*/com.apple.CarPlayApp.plist'),
             'reminders': ('Reminders', '**/Reminders/Container_v1/Stores/*.sqlite*'),
             'routineDCloud': ('Locations', '**/Library/Caches/com.apple.routined/Cloud-V2.sqlite*'),
             'routineDlocations': ('Locations', '**/com.apple.routined/Cache.sqlite*'),
