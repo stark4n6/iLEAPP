@@ -20,50 +20,55 @@ class App(ctk.CTk):
         # --- Navigation Frame ---
         self.navigation_frame = ctk.CTkFrame(self, corner_radius=0)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
-        self.navigation_frame.grid_rowconfigure(7, weight=1) # This row (6) will expand, allowing content above to stay at top and content below to stay at bottom
-        self.navigation_frame.grid_rowconfigure(8, weight=0) # Row for the new placeholder image
-        self.navigation_frame.grid_rowconfigure(9, weight=0) # Row for appearance mode frame, ensuring it's at the bottom
+        self.navigation_frame.grid_rowconfigure(7, weight=1)
+        self.navigation_frame.grid_rowconfigure(8, weight=0)
+        self.navigation_frame.grid_rowconfigure(9, weight=0)
 
-        self.ileapp_logo_image = self._load_ctk_image("assets/iLEAPP_logo.png", size=(150, 28), invert_for_dark=False)
-        self.ileapp_logo_label = ctk.CTkLabel(self.navigation_frame, text="", image=self.ileapp_logo_image)
-        self.ileapp_logo_label.grid(row=0, column=0, padx=20, pady=20)
+        # Top Logo Frame
+        self.top_logo_frame = ctk.CTkFrame(self.navigation_frame, corner_radius=10, fg_color=("gray80", "gray15"))
+        self.top_logo_frame.grid(row=0, column=0, padx=10, pady=(20, 10), sticky="ew") # Increased padding for offset
+        self.top_logo_frame.grid_columnconfigure(0, weight=1)
 
-        self.home_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home",
+        self.ileapp_logo_image = self._load_ctk_image("assets/iLEAPP_logo.png", size=(200, 43), invert_for_dark=False)
+        self.ileapp_logo_label = ctk.CTkLabel(self.top_logo_frame, text="", image=self.ileapp_logo_image)
+        self.ileapp_logo_label.grid(row=0, column=0, padx=10, pady=10) # Padding inside the new frame
+
+        self.home_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=80, border_spacing=10, text="Home",
                                          fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                          image=self._load_ctk_image("assets/home.png", size=(20, 20), invert_for_dark=True), anchor="w",
                                          command=lambda: self.handle_navigation("home"))
         self.home_button.grid(row=1, column=0, sticky="ew")
 
-        self.input_output_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Input/Output",
+        self.input_output_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=80, border_spacing=10, text="Input/Output",
                                                  fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                  image=self._load_ctk_image("assets/folder-plus.png", size=(20, 20), invert_for_dark=True), anchor="w",
                                                  command=lambda: self.handle_navigation("input_output"))
         self.input_output_button.grid(row=2, column=0, sticky="ew")
 
-        self.artifacts_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Artifacts to\nProcess",
+        self.artifacts_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=80, border_spacing=10, text="Artifacts to Process",
                                               fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                               image=self._load_ctk_image("assets/check-square.png", size=(20, 20), invert_for_dark=True), anchor="w",
                                               command=lambda: self.handle_navigation("artifacts"))
         self.artifacts_button.grid(row=3, column=0, sticky="ew")
 
-        self.case_data_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Case Data",
+        self.case_data_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=80, border_spacing=10, text="Case Data",
                                              fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                              image=self._load_ctk_image("assets/settings.png", size=(20, 20), invert_for_dark=True), anchor="w",
                                              command=lambda: self.handle_navigation("case_data"))
         self.case_data_button.grid(row=4, column=0, sticky="ew")
 
-        # --- New Image Placeholder ---
-        # Assuming you want to add an image placeholder that can be changed later.
-        # For now, it's just a blank space. You can replace "assets/placeholder_image.png"
-        # with an actual image file if you have one, or create a dummy one.
-        # Placing it at row 8, so it appears below the navigation buttons and above the appearance mode toggle.
+        # Bottom Logo Frame
+        self.bottom_logo_frame = ctk.CTkFrame(self.navigation_frame, corner_radius=10, fg_color=("gray80", "gray15"))
+        self.bottom_logo_frame.grid(row=8, column=0, padx=10, pady=(10, 10), sticky="ew") # Increased padding for offset
+        self.bottom_logo_frame.grid_columnconfigure(0, weight=1)
+
         self.new_placeholder_image = self._load_ctk_image("assets/leapps_i_logo.png", size=(200, 93), invert_for_dark=False)
-        self.new_placeholder_label = ctk.CTkLabel(self.navigation_frame, text="", image=self.new_placeholder_image)
-        self.new_placeholder_label.grid(row=8, column=0, padx=20, pady=20, sticky="s") # Changed row to 8, and added sticky="s"
+        self.new_placeholder_label = ctk.CTkLabel(self.bottom_logo_frame, text="", image=self.new_placeholder_image)
+        self.new_placeholder_label.grid(row=0, column=0, padx=10, pady=10) # Padding inside the new frame
 
         # --- Appearance Mode Toggle ---
         self.appearance_mode_frame = ctk.CTkFrame(self.navigation_frame, fg_color="transparent")
-        self.appearance_mode_frame.grid(row=9, column=0, padx=20, pady=20, sticky="s") # Adjusted row to 9
+        self.appearance_mode_frame.grid(row=9, column=0, padx=20, pady=20, sticky="s")
         self.appearance_mode_frame.grid_columnconfigure(0, weight=0)
         self.appearance_mode_frame.grid_columnconfigure(1, weight=1)
 
@@ -132,7 +137,7 @@ class App(ctk.CTk):
     def handle_navigation(self, target_frame_name):
         # Validate current frame before navigating away
         if self.current_frame_name == "input_output":
-            if not self.validate_input_output_and_proceed(silent=True): # Pass silent=True to avoid messagebox on navigation attempts
+            if not self.validate_input_output_and_proceed(silent=True):
                 return
         elif self.current_frame_name == "artifacts":
             if not self.validate_artifacts_and_proceed(silent=True):
@@ -190,7 +195,7 @@ class App(ctk.CTk):
 
         self.start_button = ctk.CTkButton(self.home_frame, text="Start",
                                           font=ctk.CTkFont(size=18, weight="bold"),
-                                          width=150, height=50,
+                                          width=150, height=100,
                                           fg_color="#FFD700", text_color="black",
                                           hover_color="#E5C300",
                                           image=self._load_ctk_image("assets/log-in.png", size=(25,25), invert_for_dark=False),
@@ -199,10 +204,9 @@ class App(ctk.CTk):
 
 
     def create_input_output_frame(self):
-        self.input_output_frame.grid_columnconfigure(0, weight=1) # Column for all main content
-        self.input_output_frame.grid_rowconfigure(7, weight=1) # This row will expand to push bottom elements down
+        self.input_output_frame.grid_columnconfigure(0, weight=1)
+        self.input_output_frame.grid_rowconfigure(7, weight=1)
 
-        # New label for Input/Output tab
         self.io_title_label = ctk.CTkLabel(self.input_output_frame, text="Input & Output",
                                                   font=ctk.CTkFont(size=24, weight="bold"),
                                                   text_color=("black", "#FFD700"))
@@ -219,10 +223,10 @@ class App(ctk.CTk):
         self.input_buttons_frame.grid_columnconfigure(0, weight=0)
         self.input_buttons_frame.grid_columnconfigure(1, weight=0)
 
-        self.input_file_button = ctk.CTkButton(self.input_buttons_frame, text="File", command=self.browse_input_file)
+        self.input_file_button = ctk.CTkButton(self.input_buttons_frame, text="File", height=60, command=self.browse_input_file)
         self.input_file_button.grid(row=0, column=0, padx=(0, 10))
 
-        self.input_folder_button = ctk.CTkButton(self.input_buttons_frame, text="Folder", command=self.browse_input_folder)
+        self.input_folder_button = ctk.CTkButton(self.input_buttons_frame, text="Folder", height=60, command=self.browse_input_folder)
         self.input_folder_button.grid(row=0, column=1)
 
         self.output_label = ctk.CTkLabel(self.input_output_frame, text="Output Folder:", font=ctk.CTkFont(size=16, weight="bold"))
@@ -231,16 +235,14 @@ class App(ctk.CTk):
         self.output_entry = ctk.CTkEntry(self.input_output_frame, placeholder_text="Select output folder", width=400)
         self.output_entry.grid(row=5, column=0, padx=20, pady=(0, 10), sticky="ew")
 
-        self.output_folder_button = ctk.CTkButton(self.input_output_frame, text="Output Folder", command=self.browse_output_folder)
+        self.output_folder_button = ctk.CTkButton(self.input_output_frame, text="Output Folder", height=60, command=self.browse_output_folder)
         self.output_folder_button.grid(row=6, column=0, padx=20, pady=(0, 5), sticky="w")
 
-        # Error label moved right below output folder button, left aligned
         self.io_error_label = ctk.CTkLabel(self.input_output_frame, text="", text_color="red")
         self.io_error_label.grid(row=7, column=0, padx=20, pady=(0, 20), sticky="w")
 
-        # Next button at the very bottom right
         self.next_io_button = ctk.CTkButton(self.input_output_frame, text="Next",
-                                            font=ctk.CTkFont(size=16, weight="bold"),
+                                            font=ctk.CTkFont(size=16, weight="bold"), height=60,
                                             command=lambda: self.validate_input_output_and_proceed(silent=False))
         self.next_io_button.grid(row=8, column=0, padx=20, pady=(10, 20), sticky="se")
 
@@ -266,7 +268,7 @@ class App(ctk.CTk):
             return False
         else:
             self.io_error_label.configure(text="")
-            if not silent: # Only change frame if not silent (i.e., called from Next button)
+            if not silent:
                  self.select_frame_by_name("artifacts")
             return True
 
@@ -293,10 +295,9 @@ class App(ctk.CTk):
         self.artifacts_frame.grid_columnconfigure(0, weight=1)
         self.artifacts_frame.grid_columnconfigure(1, weight=0)
         self.artifacts_frame.grid_columnconfigure(2, weight=0)
-        self.artifacts_frame.grid_rowconfigure(3, weight=1) # Adjusted for new title label
-        self.artifacts_frame.grid_rowconfigure(6, weight=0) # Adjusted for new title label
+        self.artifacts_frame.grid_rowconfigure(3, weight=1)
+        self.artifacts_frame.grid_rowconfigure(6, weight=0)
 
-        # New label for Artifacts tab
         self.artifacts_title_label = ctk.CTkLabel(self.artifacts_frame, text="Artifacts to Process",
                                                   font=ctk.CTkFont(size=24, weight="bold"),
                                                   text_color=("black", "#FFD700"))
@@ -309,15 +310,15 @@ class App(ctk.CTk):
         self.search_entry.grid(row=2, column=0, padx=(20, 10), pady=(0, 10), sticky="ew")
         self.search_entry.bind("<KeyRelease>", self.filter_artifacts_checkboxes)
 
-        self.select_all_button = ctk.CTkButton(self.artifacts_frame, text="Select All",
+        self.select_all_button = ctk.CTkButton(self.artifacts_frame, text="Select All", height=60,
                                                 command=self.select_all_artifacts)
         self.select_all_button.grid(row=2, column=1, padx=(0, 5), pady=(0, 10), sticky="e")
 
-        self.deselect_all_button = ctk.CTkButton(self.artifacts_frame, text="Deselect All",
+        self.deselect_all_button = ctk.CTkButton(self.artifacts_frame, text="Deselect All", height=60,
                                                   command=self.deselect_all_artifacts)
         self.deselect_all_button.grid(row=2, column=2, padx=(5, 20), pady=(0, 10), sticky="w")
 
-        self.checkbox_scroll_frame = ctk.CTkScrollableFrame(self.artifacts_frame, label_text="Artifacts to Process")
+        self.checkbox_scroll_frame = ctk.CTkScrollableFrame(self.artifacts_frame)
         self.checkbox_scroll_frame.grid(row=3, column=0, columnspan=3, padx=20, pady=20, sticky="nsew")
         self.checkbox_scroll_frame.grid_columnconfigure(0, weight=1)
 
@@ -342,16 +343,16 @@ class App(ctk.CTk):
         self.artifacts_bottom_buttons_frame.grid_columnconfigure(1, weight=0)
         self.artifacts_bottom_buttons_frame.grid_columnconfigure(2, weight=1)
 
-        self.load_profile_button = ctk.CTkButton(self.artifacts_bottom_buttons_frame, text="Load Profile",
+        self.load_profile_button = ctk.CTkButton(self.artifacts_bottom_buttons_frame, text="Load Profile", height=60,
                                                  command=self.load_profile)
         self.load_profile_button.grid(row=0, column=0, padx=(0, 10), sticky="w")
 
-        self.save_profile_button = ctk.CTkButton(self.artifacts_bottom_buttons_frame, text="Save Profile",
+        self.save_profile_button = ctk.CTkButton(self.artifacts_bottom_buttons_frame, text="Save Profile", height=60,
                                                  command=self.save_profile)
         self.save_profile_button.grid(row=0, column=1, padx=(0, 10), sticky="w")
 
         self.next_artifacts_button = ctk.CTkButton(self.artifacts_bottom_buttons_frame, text="Next",
-                                                   font=ctk.CTkFont(size=16, weight="bold"),
+                                                   font=ctk.CTkFont(size=16, weight="bold"), height=60,
                                                    command=lambda: self.validate_artifacts_and_proceed(silent=False))
         self.next_artifacts_button.grid(row=0, column=2, padx=(10, 0), sticky="e")
 
@@ -432,12 +433,12 @@ class App(ctk.CTk):
 
         if not any_checked:
             self.artifacts_error_label.configure(text="At least one artifact must be selected to proceed.")
-            if not silent: # Only show messagebox if not silent
+            if not silent:
                 messagebox.showwarning("Validation Error", "Please select at least one artifact to process.")
             return False
         else:
             self.artifacts_error_label.configure(text="")
-            if not silent: # Only change frame if not silent (i.e., called from Next button)
+            if not silent:
                 self.select_frame_by_name("case_data")
             return True
 
@@ -481,7 +482,7 @@ class App(ctk.CTk):
 
         self.agency_logo_entry = ctk.CTkEntry(self.agency_logo_control_frame, placeholder_text="")
         self.agency_logo_entry.grid(row=0, column=0, padx=(0, 10), sticky="ew")
-        self.agency_logo_button = ctk.CTkButton(self.agency_logo_control_frame, text="Add File", command=self.browse_agency_logo)
+        self.agency_logo_button = ctk.CTkButton(self.agency_logo_control_frame, text="Add File", height=60, command=self.browse_agency_logo)
         self.agency_logo_button.grid(row=0, column=1, sticky="e")
 
         # --- Examiner Frame ---
@@ -503,19 +504,19 @@ class App(ctk.CTk):
         self.case_data_buttons_frame.grid_columnconfigure(3, weight=1)
         self.case_data_buttons_frame.grid_columnconfigure(4, weight=1)
 
-        self.load_case_data_button = ctk.CTkButton(self.case_data_buttons_frame, text="Load Case Data File")
+        self.load_case_data_button = ctk.CTkButton(self.case_data_buttons_frame, text="Load Case Data File", height=60)
         self.load_case_data_button.grid(row=0, column=0, padx=(0, 10), sticky="e")
 
-        self.save_case_data_button = ctk.CTkButton(self.case_data_buttons_frame, text="Save Case Data File")
+        self.save_case_data_button = ctk.CTkButton(self.case_data_buttons_frame, text="Save Case Data File", height=60)
         self.save_case_data_button.grid(row=0, column=1, padx=(0, 10), sticky="w")
 
         self.separator_label = ctk.CTkLabel(self.case_data_buttons_frame, text="|", font=ctk.CTkFont(size=24), text_color=("gray50", "gray40"))
         self.separator_label.grid(row=0, column=2, padx=(5, 5), sticky="ns")
 
-        self.clear_button = ctk.CTkButton(self.case_data_buttons_frame, text="Clear", fg_color="#FFD700", text_color="black", hover_color="#E5C300", command=self.clear_case_data_fields)
+        self.clear_button = ctk.CTkButton(self.case_data_buttons_frame, text="Clear", fg_color="#FFD700", text_color="black", hover_color="#E5C300", height=60, command=self.clear_case_data_fields)
         self.clear_button.grid(row=0, column=3, padx=(10, 5), sticky="e")
 
-        self.close_button = ctk.CTkButton(self.case_data_buttons_frame, text="Close", command=self.destroy)
+        self.close_button = ctk.CTkButton(self.case_data_buttons_frame, text="Close", height=60, command=self.destroy)
         self.close_button.grid(row=0, column=4, padx=(5, 0), sticky="w")
 
     def browse_agency_logo(self):
