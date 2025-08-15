@@ -18,9 +18,17 @@ class App(ctk.CTk):
 
         os.makedirs("assets", exist_ok=True)
 
+        # Initialize instance variables to store StringVar objects for case data
+        self.casedata = {
+            'Case Number': ctk.StringVar(),
+            'Agency': ctk.StringVar(),
+            'Agency Logo Path': ctk.StringVar(),
+            'Examiner': ctk.StringVar()
+        }
+
         # Initialize class-level variables
         self.current_frame_name = None
-
+        
         # Instantiate PluginLoader and populate artifact list from it
         self.plugin_loader = plugin_loader.PluginLoader()
         self.artifact_list = sorted([plugin.name for plugin in self.plugin_loader.plugins])
@@ -184,9 +192,9 @@ class App(ctk.CTk):
         self.home_frame.grid_columnconfigure(0, weight=1)
         self.home_frame.grid_rowconfigure(0, weight=1)
 
-        self.ileapps_logo_image = self._load_ctk_image("assets/icon.png", size=(256, 256), invert_for_dark=False)
-        self.ileapps_logo_label = ctk.CTkLabel(self.home_frame, text="", image=self.ileapps_logo_image)
-        self.ileapps_logo_label.grid(row=0, column=0, pady=(100, 10))
+        self.ileapp_logo_image = self._load_ctk_image("assets/icon.png", size=(225, 225), invert_for_dark=False)
+        self.ileapps_logo_label = ctk.CTkLabel(self.home_frame, text="", image=self.ileapp_logo_image)
+        self.ileapps_logo_label.grid(row=0, column=0, pady=(50, 10))
 
         self.info_frame = ctk.CTkFrame(self.home_frame, corner_radius=10, fg_color=("gray85", "gray20"))
         self.info_frame.grid(row=1, column=0, pady=20, padx=50, sticky="ew")
@@ -350,7 +358,7 @@ class App(ctk.CTk):
         self.artifacts_error_label.grid(row=5, column=0, columnspan=3, padx=20, pady=5, sticky="ew")
 
         self.artifacts_bottom_buttons_frame = ctk.CTkFrame(self.artifacts_frame, fg_color="transparent")
-        self.artifacts_bottom_buttons_frame.grid(row=6, column=0, columnspan=3, padx=20, pady=(10, 20), sticky="ew")
+        self.artifacts_bottom_buttons_frame.grid(row=6, column=0, columnspan=3, padx=20, pady=(20, 20), sticky="ew")
         self.artifacts_bottom_buttons_frame.grid_columnconfigure(0, weight=0)
         self.artifacts_bottom_buttons_frame.grid_columnconfigure(1, weight=0)
         self.artifacts_bottom_buttons_frame.grid_columnconfigure(2, weight=1)
@@ -410,7 +418,7 @@ class App(ctk.CTk):
         self.update_module_count_label()
 
     def load_profile(self):
-        file_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")])
+        file_path = filedialog.askopenfilename(filetypes=[('iLEAPP Profile', '*.ilprofile'),])
         if file_path:
             try:
                 with open(file_path, 'r') as f:
@@ -426,7 +434,7 @@ class App(ctk.CTk):
                 messagebox.showerror("Error", f"Failed to load profile: {e}")
 
     def save_profile(self):
-        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")])
+        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[('iLEAPP Profile', '*.ilprofile'),])
         if file_path:
             profile_data = {}
             for artifact_name in self.artifact_list:
@@ -438,6 +446,23 @@ class App(ctk.CTk):
                 messagebox.showinfo("Profile Saved", f"Profile saved successfully to {os.path.basename(file_path)}")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to save profile: {e}")
+    
+    
+    def save_case_data(self):
+        file_path = filedialog.asksaveasfilename(title='Save a case data file', defaultextension=".lcasedata", filetypes=[('LEAPP Case Data', '*.lcasedata'),])
+        if file_path:
+            # Create a dictionary of the string variable values
+            case_data_values = {key: value.get() for key, value in self.casedata.items()}
+            
+            # Create the main dictionary with the required structure
+            case_data_dict = {'leapp': 'case_data', 'case_data_values': case_data_values}
+            
+            try:
+                with open(file_path, 'wt', encoding='utf-8') as case_data_out:
+                    json.dump(case_data_dict, case_data_out, indent=4)
+                messagebox.showinfo("Case Data Saved", f"Case data saved successfully to {os.path.basename(file_path)}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to save case data: {e}")
 
 
     def validate_artifacts_and_proceed(self, silent=False):
@@ -476,7 +501,7 @@ class App(ctk.CTk):
 
         self.case_number_label = ctk.CTkLabel(self.case_number_frame, text="Case Number", font=ctk.CTkFont(size=14, weight="bold"))
         self.case_number_label.grid(row=0, column=0, padx=15, pady=(15, 5), sticky="w")
-        self.case_number_entry = ctk.CTkEntry(self.case_number_frame, placeholder_text="", width=300)
+        self.case_number_entry = ctk.CTkEntry(self.case_number_frame, placeholder_text="", width=300, textvariable=self.casedata['Case Number'])
         self.case_number_entry.grid(row=1, column=0, padx=15, pady=(0, 15), sticky="ew")
 
         # --- Agency Frame ---
@@ -486,10 +511,10 @@ class App(ctk.CTk):
 
         self.agency_name_label = ctk.CTkLabel(self.agency_frame, text="Agency", font=ctk.CTkFont(size=14, weight="bold"))
         self.agency_name_label.grid(row=0, column=0, padx=15, pady=(15, 5), sticky="w")
-        self.agency_name_entry = ctk.CTkEntry(self.agency_frame, placeholder_text="Name:", width=300)
+        self.agency_name_entry = ctk.CTkEntry(self.agency_frame, placeholder_text="", width=300, textvariable=self.casedata['Agency'])
         self.agency_name_entry.grid(row=1, column=0, padx=15, pady=(0, 5), sticky="ew")
 
-        self.agency_logo_label = ctk.CTkLabel(self.agency_frame, text="Logo:", font=ctk.CTkFont(size=14))
+        self.agency_logo_label = ctk.CTkLabel(self.agency_frame, text="Logo", font=ctk.CTkFont(size=14))
         self.agency_logo_label.grid(row=2, column=0, padx=15, pady=(5, 5), sticky="w")
 
         self.agency_logo_control_frame = ctk.CTkFrame(self.agency_frame, fg_color="transparent")
@@ -497,7 +522,7 @@ class App(ctk.CTk):
         self.agency_logo_control_frame.grid_columnconfigure(0, weight=1)
         self.agency_logo_control_frame.grid_columnconfigure(1, weight=0)
 
-        self.agency_logo_entry = ctk.CTkEntry(self.agency_logo_control_frame, placeholder_text="")
+        self.agency_logo_entry = ctk.CTkEntry(self.agency_logo_control_frame, placeholder_text="", textvariable=self.casedata['Agency Logo Path'])
         self.agency_logo_entry.grid(row=0, column=0, padx=(0, 10), sticky="ew")
         self.agency_logo_button = ctk.CTkButton(self.agency_logo_control_frame, text="Add File", height=60, command=self.browse_agency_logo)
         self.agency_logo_button.grid(row=0, column=1, sticky="e")
@@ -509,22 +534,22 @@ class App(ctk.CTk):
 
         self.examiner_label = ctk.CTkLabel(self.examiner_frame, text="Examiner", font=ctk.CTkFont(size=14, weight="bold"))
         self.examiner_label.grid(row=0, column=0, padx=15, pady=(15, 5), sticky="w")
-        self.examiner_entry = ctk.CTkEntry(self.examiner_frame, placeholder_text="", width=300)
+        self.examiner_entry = ctk.CTkEntry(self.examiner_frame, placeholder_text="", width=300, textvariable=self.casedata['Examiner'])
         self.examiner_entry.grid(row=1, column=0, padx=15, pady=(0, 15), sticky="ew")
 
         # --- Action Buttons Frame ---
         self.case_data_buttons_frame = ctk.CTkFrame(self.case_data_frame, fg_color="transparent")
-        self.case_data_buttons_frame.grid(row=5, column=0, padx=20, pady=(20, 20), sticky="sew")
-        self.case_data_buttons_frame.grid_columnconfigure(0, weight=1)
-        self.case_data_buttons_frame.grid_columnconfigure(1, weight=1)
-        self.case_data_buttons_frame.grid_columnconfigure(2, weight=0)
-        self.case_data_buttons_frame.grid_columnconfigure(3, weight=1)
-        self.case_data_buttons_frame.grid_columnconfigure(4, weight=1)
+        self.case_data_buttons_frame.grid(row=5, column=0, padx=20, pady=(12, 28), sticky="sew")
+        self.case_data_buttons_frame.grid_columnconfigure(0, weight=0)
+        self.case_data_buttons_frame.grid_columnconfigure(1, weight=0)
+        self.case_data_buttons_frame.grid_columnconfigure(2, weight=1)
+        self.case_data_buttons_frame.grid_columnconfigure(3, weight=0)
+        self.case_data_buttons_frame.grid_columnconfigure(4, weight=0)
 
-        self.load_case_data_button = ctk.CTkButton(self.case_data_buttons_frame, text="Load Case Data File", height=60)
-        self.load_case_data_button.grid(row=0, column=0, padx=(0, 10), sticky="e")
+        self.load_case_data_button = ctk.CTkButton(self.case_data_buttons_frame, text="Load Case Data File", height=60, command=self.load_case_data)
+        self.load_case_data_button.grid(row=0, column=0, padx=(0, 10), sticky="w")
 
-        self.save_case_data_button = ctk.CTkButton(self.case_data_buttons_frame, text="Save Case Data File", height=60)
+        self.save_case_data_button = ctk.CTkButton(self.case_data_buttons_frame, text="Save Case Data File", height=60, command=self.save_case_data)
         self.save_case_data_button.grid(row=0, column=1, padx=(0, 10), sticky="w")
 
         self.separator_label = ctk.CTkLabel(self.case_data_buttons_frame, text="|", font=ctk.CTkFont(size=24), text_color=("gray50", "gray40"))
@@ -533,8 +558,10 @@ class App(ctk.CTk):
         self.clear_button = ctk.CTkButton(self.case_data_buttons_frame, text="Clear", fg_color="#FFD700", text_color="black", hover_color="#E5C300", height=60, command=self.clear_case_data_fields)
         self.clear_button.grid(row=0, column=3, padx=(10, 5), sticky="e")
 
-        self.close_button = ctk.CTkButton(self.case_data_buttons_frame, text="Close", height=60, command=self.destroy)
-        self.close_button.grid(row=0, column=4, padx=(5, 0), sticky="w")
+        self.close_button = ctk.CTkButton(self.case_data_buttons_frame, text="Process",
+                                          font=ctk.CTkFont(size=16, weight="bold"), height=60,
+                                          command=self.destroy)
+        self.close_button.grid(row=0, column=4, padx=(5, 0), sticky="e")
 
     def browse_agency_logo(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png *.jpg *.jpeg *.gif *.bmp")])
@@ -543,12 +570,24 @@ class App(ctk.CTk):
             self.agency_logo_entry.insert(0, file_path)
 
     def clear_case_data_fields(self):
-        self.case_number_entry.delete(0, ctk.END)
-        self.agency_name_entry.delete(0, ctk.END)
-        self.agency_logo_entry.delete(0, ctk.END)
-        self.examiner_entry.delete(0, ctk.END)
+        # Clear the variables, which will also clear the entry widgets
+        for var in self.casedata.values():
+            var.set("")
         messagebox.showinfo("Clear Fields", "All Case Data fields have been cleared.")
-
+    
+    def load_case_data(self):
+        file_path = filedialog.askopenfilename(title='Load a case data file', defaultextension=".lcasedata", filetypes=[('LEAPP Case Data', '*.lcasedata'),])
+        if file_path:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as case_data_in:
+                    loaded_data = json.load(case_data_in)
+                    case_data_values = loaded_data.get('case_data_values', {})
+                    for key, value in case_data_values.items():
+                        if key in self.casedata:
+                            self.casedata[key].set(value)
+                messagebox.showinfo("Case Data Loaded", f"Case data loaded successfully from {os.path.basename(file_path)}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load case data: {e}")
 
 if __name__ == "__main__":
     app = App()
