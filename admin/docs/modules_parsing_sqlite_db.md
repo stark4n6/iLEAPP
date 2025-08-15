@@ -8,7 +8,10 @@ This document outlines iLEAPP modules parsing SQLite databases using the new `ge
 <!-- GET_RECORDS_START -->
 | Source Modules |
 |----------------|
+| AMDSQLiteDB |
+| Airbnb |
 | BeReal |
+| LinkedIn |
 | Ph11KwrdsCapsTitlesDescripsBasicAssetData |
 | Ph15PeopleandDetFacesNAD |
 | Ph16AssetPeopleandDetFaces |
@@ -78,7 +81,6 @@ This document outlines iLEAPP modules parsing SQLite databases using the new `ge
 | ConnectedDeviceInformation |
 | DataUsage |
 | FitnessWorkoutsLocationData |
-| LinkedIn |
 | Oops |
 | Ph10AssetParsedEmbeddedFiles |
 | Ph70UserAdjustDateTimezoneLocation |
