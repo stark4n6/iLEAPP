@@ -3,19 +3,29 @@ from PIL import Image, ImageTk, ImageOps
 import os
 from tkinter import messagebox, filedialog
 import json
+import scripts.plugin_loader as plugin_loader
 
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
         self.title("iLEAPP GUI")
-        self.geometry("1000x700")
+        self.geometry("1000x600")
         self.resizable(False, False)
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
         os.makedirs("assets", exist_ok=True)
+
+        # Initialize class-level variables
+        self.current_frame_name = None
+
+        # Instantiate PluginLoader and populate artifact list from it
+        self.plugin_loader = plugin_loader.PluginLoader()
+        self.artifact_list = sorted([plugin.name for plugin in self.plugin_loader.plugins])
+        self.artifact_widgets = {}
+        self.module_count_var = ctk.StringVar()
 
         # --- Navigation Frame ---
         self.navigation_frame = ctk.CTkFrame(self, corner_radius=0)
@@ -26,12 +36,12 @@ class App(ctk.CTk):
 
         # Top Logo Frame
         self.top_logo_frame = ctk.CTkFrame(self.navigation_frame, corner_radius=10, fg_color=("gray80", "gray15"))
-        self.top_logo_frame.grid(row=0, column=0, padx=10, pady=(20, 10), sticky="ew") # Increased padding for offset
+        self.top_logo_frame.grid(row=0, column=0, padx=10, pady=(20, 10), sticky="ew")
         self.top_logo_frame.grid_columnconfigure(0, weight=1)
 
         self.ileapp_logo_image = self._load_ctk_image("assets/iLEAPP_logo.png", size=(200, 43), invert_for_dark=False)
         self.ileapp_logo_label = ctk.CTkLabel(self.top_logo_frame, text="", image=self.ileapp_logo_image)
-        self.ileapp_logo_label.grid(row=0, column=0, padx=10, pady=10) # Padding inside the new frame
+        self.ileapp_logo_label.grid(row=0, column=0, padx=10, pady=10)
 
         self.home_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=80, border_spacing=10, text="Home",
                                          fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
@@ -59,12 +69,12 @@ class App(ctk.CTk):
 
         # Bottom Logo Frame
         self.bottom_logo_frame = ctk.CTkFrame(self.navigation_frame, corner_radius=10, fg_color=("gray80", "gray15"))
-        self.bottom_logo_frame.grid(row=8, column=0, padx=10, pady=(10, 10), sticky="ew") # Increased padding for offset
+        self.bottom_logo_frame.grid(row=8, column=0, padx=10, pady=(10, 10), sticky="ew")
         self.bottom_logo_frame.grid_columnconfigure(0, weight=1)
 
         self.new_placeholder_image = self._load_ctk_image("assets/leapps_i_logo.png", size=(200, 93), invert_for_dark=False)
         self.new_placeholder_label = ctk.CTkLabel(self.bottom_logo_frame, text="", image=self.new_placeholder_image)
-        self.new_placeholder_label.grid(row=0, column=0, padx=10, pady=10) # Padding inside the new frame
+        self.new_placeholder_label.grid(row=0, column=0, padx=10, pady=10)
 
         # --- Appearance Mode Toggle ---
         self.appearance_mode_frame = ctk.CTkFrame(self.navigation_frame, fg_color="transparent")
@@ -91,9 +101,6 @@ class App(ctk.CTk):
         self.input_output_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.artifacts_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.case_data_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-
-        # Keep track of the currently active frame
-        self.current_frame_name = None
 
         self.create_home_frame()
         self.create_input_output_frame()
@@ -291,11 +298,20 @@ class App(ctk.CTk):
             self.output_entry.delete(0, ctk.END)
             self.output_entry.insert(0, folder_path)
 
+    def update_module_count_label(self):
+        selected_count = 0
+        total_count = len(self.artifact_list)
+        for _, var in self.artifact_widgets.values():
+            if var.get() == "on":
+                selected_count += 1
+        self.module_count_var.set(f"Number of selected modules: {selected_count} / {total_count}")
+
+
     def create_artifacts_frame(self):
         self.artifacts_frame.grid_columnconfigure(0, weight=1)
         self.artifacts_frame.grid_columnconfigure(1, weight=0)
         self.artifacts_frame.grid_columnconfigure(2, weight=0)
-        self.artifacts_frame.grid_rowconfigure(3, weight=1)
+        self.artifacts_frame.grid_rowconfigure(4, weight=1)
         self.artifacts_frame.grid_rowconfigure(6, weight=0)
 
         self.artifacts_title_label = ctk.CTkLabel(self.artifacts_frame, text="Artifacts to Process",
@@ -303,42 +319,38 @@ class App(ctk.CTk):
                                                   text_color=("black", "#FFD700"))
         self.artifacts_title_label.grid(row=0, column=0, columnspan=3, padx=20, pady=(20, 20), sticky="w")
 
+        # Added new label for module count
+        self.module_count_label = ctk.CTkLabel(self.artifacts_frame, textvariable=self.module_count_var,
+                                               font=ctk.CTkFont(size=16, weight="bold"),
+                                               text_color=("black", "#FFD700"))
+        self.module_count_label.grid(row=1, column=0, columnspan=3, padx=20, pady=(10, 5), sticky="w")
+
         self.search_label = ctk.CTkLabel(self.artifacts_frame, text="Search Artifacts:", font=ctk.CTkFont(size=16))
-        self.search_label.grid(row=1, column=0, padx=20, pady=(20, 5), sticky="w")
+        self.search_label.grid(row=2, column=0, padx=20, pady=(20, 5), sticky="w")
 
         self.search_entry = ctk.CTkEntry(self.artifacts_frame, placeholder_text="Type to filter artifacts", width=200)
-        self.search_entry.grid(row=2, column=0, padx=(20, 10), pady=(0, 10), sticky="ew")
+        self.search_entry.grid(row=3, column=0, padx=(20, 10), pady=(0, 10), sticky="ew")
         self.search_entry.bind("<KeyRelease>", self.filter_artifacts_checkboxes)
 
         self.select_all_button = ctk.CTkButton(self.artifacts_frame, text="Select All", height=60,
                                                 command=self.select_all_artifacts)
-        self.select_all_button.grid(row=2, column=1, padx=(0, 5), pady=(0, 10), sticky="e")
+        self.select_all_button.grid(row=3, column=1, padx=(0, 5), pady=(0, 10), sticky="e")
 
         self.deselect_all_button = ctk.CTkButton(self.artifacts_frame, text="Deselect All", height=60,
                                                   command=self.deselect_all_artifacts)
-        self.deselect_all_button.grid(row=2, column=2, padx=(5, 20), pady=(0, 10), sticky="w")
+        self.deselect_all_button.grid(row=3, column=2, padx=(5, 20), pady=(0, 10), sticky="w")
 
         self.checkbox_scroll_frame = ctk.CTkScrollableFrame(self.artifacts_frame)
-        self.checkbox_scroll_frame.grid(row=3, column=0, columnspan=3, padx=20, pady=20, sticky="nsew")
+        self.checkbox_scroll_frame.grid(row=4, column=0, columnspan=3, padx=20, pady=20, sticky="nsew")
         self.checkbox_scroll_frame.grid_columnconfigure(0, weight=1)
 
-        self.artifact_list = [
-            "Accounts", "AddressBook", "Activity", "CallHistory", "Calendar",
-            "CloudKit", "CoreDuet", "CrashLogs", "DataUsage", "Downloads",
-            "DuetActivityScheduler", "FaceTime", "Health", "KnowledgeC", "Location",
-            "MediaLibrary", "Messages", "MobileInstallation", "Notes", "Passbook",
-            "Photos", "PowerLog", "Safari", "ScreenTime", "Shortcuts",
-            "SMS", "Social", "Spotlight", "System", "ThirdPartyApps", "Usage"
-        ]
-
-        self.artifact_widgets = {}
         self.populate_artifacts_checkboxes()
 
         self.artifacts_error_label = ctk.CTkLabel(self.artifacts_frame, text="", text_color="red")
-        self.artifacts_error_label.grid(row=4, column=0, columnspan=3, padx=20, pady=5, sticky="ew")
+        self.artifacts_error_label.grid(row=5, column=0, columnspan=3, padx=20, pady=5, sticky="ew")
 
         self.artifacts_bottom_buttons_frame = ctk.CTkFrame(self.artifacts_frame, fg_color="transparent")
-        self.artifacts_bottom_buttons_frame.grid(row=5, column=0, columnspan=3, padx=20, pady=(10, 20), sticky="ew")
+        self.artifacts_bottom_buttons_frame.grid(row=6, column=0, columnspan=3, padx=20, pady=(10, 20), sticky="ew")
         self.artifacts_bottom_buttons_frame.grid_columnconfigure(0, weight=0)
         self.artifacts_bottom_buttons_frame.grid_columnconfigure(1, weight=0)
         self.artifacts_bottom_buttons_frame.grid_columnconfigure(2, weight=1)
@@ -355,6 +367,7 @@ class App(ctk.CTk):
                                                    font=ctk.CTkFont(size=16, weight="bold"), height=60,
                                                    command=lambda: self.validate_artifacts_and_proceed(silent=False))
         self.next_artifacts_button.grid(row=0, column=2, padx=(10, 0), sticky="e")
+        self.update_module_count_label()
 
 
     def populate_artifacts_checkboxes(self):
@@ -364,9 +377,10 @@ class App(ctk.CTk):
 
         for i, artifact in enumerate(self.artifact_list):
             var = ctk.StringVar(value="on")
-            checkbox = ctk.CTkCheckBox(master=self.checkbox_scroll_frame, text=artifact, variable=var, onvalue="on", offvalue="off")
+            checkbox = ctk.CTkCheckBox(master=self.checkbox_scroll_frame, text=artifact, variable=var, onvalue="on", offvalue="off", command=self.update_module_count_label)
             checkbox.grid(row=i, column=0, pady=(5, 5), padx=10, sticky="w")
             self.artifact_widgets[artifact] = (checkbox, var)
+        self.update_module_count_label()
 
     def filter_artifacts_checkboxes(self, event=None):
         search_term = self.search_entry.get().strip().lower()
@@ -386,12 +400,14 @@ class App(ctk.CTk):
             _, var = self.artifact_widgets[artifact_name]
             var.set("on")
         self.filter_artifacts_checkboxes()
+        self.update_module_count_label()
 
     def deselect_all_artifacts(self):
         for artifact_name in self.artifact_list:
             _, var = self.artifact_widgets[artifact_name]
             var.set("off")
         self.filter_artifacts_checkboxes()
+        self.update_module_count_label()
 
     def load_profile(self):
         file_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")])
@@ -405,6 +421,7 @@ class App(ctk.CTk):
                         var.set("on" if state else "off")
                 messagebox.showinfo("Profile Loaded", f"Profile loaded successfully from {os.path.basename(file_path)}")
                 self.filter_artifacts_checkboxes()
+                self.update_module_count_label()
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load profile: {e}")
 
@@ -447,7 +464,7 @@ class App(ctk.CTk):
         self.case_data_frame.grid_columnconfigure(0, weight=1)
         self.case_data_frame.grid_rowconfigure(4, weight=1)
 
-        self.case_data_title_label = ctk.CTkLabel(self.case_data_frame, text="Add Case Data",
+        self.case_data_title_label = ctk.CTkLabel(self.case_data_frame, text="Add Case Data (Optional)",
                                                   font=ctk.CTkFont(size=24, weight="bold"),
                                                   text_color=("black", "#FFD700"))
         self.case_data_title_label.grid(row=0, column=0, padx=20, pady=(20, 20), sticky="w")
