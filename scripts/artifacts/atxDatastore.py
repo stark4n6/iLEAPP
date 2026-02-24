@@ -6,7 +6,7 @@ __artifacts_v2__ = {
         "creation_date": "2023-10-11",
         "last_update_date": "2025-10-22",
         "requirements": "none",
-        "category": "Locations",
+        "category": "Location",
         "notes": "",
         "paths": ('*DuetExpertCenter/_ATXDataStore.db*', '*routined/Local.sqlite*'),
         "output_types": "all"
